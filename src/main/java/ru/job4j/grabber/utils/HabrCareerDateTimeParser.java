@@ -10,9 +10,4 @@ public class HabrCareerDateTimeParser implements DateTimeParser {
         OffsetDateTime offsetDateTime = OffsetDateTime.parse(parse);
         return offsetDateTime.toLocalDateTime();
     }
-
-    public static void main(String[] args) {
-        HabrCareerDateTimeParser habrCareerDateTimeParser = new HabrCareerDateTimeParser();
-        System.out.println(habrCareerDateTimeParser.parse("2024-04-20T12:30:03+03:00"));
-    }
 }
