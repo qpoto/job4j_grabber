@@ -21,7 +21,7 @@ public class HabrCareerParse {
         Document document = connection.get();
         Elements rows = document.select(".vacancy-card__inner");
         rows.forEach(row -> {
-            String date = row.select(".basic-date").text();
+            String date = row.select(".basic-date").attr("datetime");
             String vacancyName = row.select(".vacancy-card__title").first().text();
             Element linkElement = row.select(".vacancy-card__inner").first();
             String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
