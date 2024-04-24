@@ -28,30 +28,29 @@ public class HabrCareerParse implements Parse {
     public static void main(String[] args) throws IOException {
         DateTimeParser dateTimeParser = new HabrCareerDateTimeParser();
         Parse parse = new HabrCareerParse(dateTimeParser);
-        List<Post> posts = parse.list(
-                "НЕ ПОЙМУ, ЧТО ВЫ ХОТИТЕ ЧТОБЫ Я СЮДА ПЕРЕДОВАЛ? КАКОЙ ЛИНК?"
-                        + "ПО ИДЕЕ ЭТО ДОЛЖНА БЫТЬ ССЫЛКА НА СТРАНИЦУ С ВАКАНСИЯМИ, НО"
-                        + "ТОГДА МЕТОД ВЕРНЕТ ВАКАНСИИ ТОЛЬКО С ОДНОЙ СТРАНИЦЫ :-)");
+        List<Post> posts = parse.list(SOURCE_LINK);
+        for (Post post : posts) {
+            System.out.println(post.toString());
+        }
     }
 
     @Override
     public List<Post> list(String link) throws IOException {
         List<Post> posts = new ArrayList<>();
         for (int pageNumber = 1; pageNumber <= PAGES; pageNumber++) {
-            String fullLinkToVacancies = "%s%s%d%s".formatted(SOURCE_LINK, PREFIX, pageNumber, SUFFIX);
+            String fullLinkToVacancies = "%s%s%d%s".formatted(link, PREFIX, pageNumber, SUFFIX);
             Connection connection = Jsoup.connect(fullLinkToVacancies);
             Document document = connection.get();
             Elements rows = document.select(".vacancy-card__inner");
-
             rows.forEach(row -> {
-                int id = 1;
                 String title = row.select(".vacancy-card__title").first().text();
                 String linkVacancy = row.select(".vacancy-card__title-link").attr("href");
                 String fullLink = String.format("%s%s", SOURCE_LINK, linkVacancy);
                 LocalDateTime date = dateTimeParser.parse(row.select(".basic-date").attr("datetime"));
+                int id = Integer.parseInt(linkVacancy.split("/")[2]);
                 try {
                     String description = retrieveDescription(fullLink);
-                    posts.add(new Post(id++, title, fullLink, description, date));
+                    posts.add(new Post(id, title, fullLink, description, date));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
