@@ -1,5 +1,7 @@
 package ru.job4j.grabber;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,17 +12,16 @@ public class PsqlStore implements Store {
 
     private Connection connection;
 
-    public PsqlStore(Properties config) throws SQLException {
-        try {
-            Class.forName(config.getProperty("jdbc.driver"));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
+    public PsqlStore(Properties config) throws Exception {
+        try (InputStream input = Grabber.class.getClassLoader()
+                .getResourceAsStream("app.properties")) {
+            config.load(input);
+            Class.forName(config.getProperty("driver_class"));
+            connection = DriverManager.getConnection(
+                    config.getProperty("url"),
+                    config.getProperty("login"),
+                    config.getProperty("password"));
         }
-        connection = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/postgres",
-                "postgres",
-                "password"
-        );
     }
 
     @Override
