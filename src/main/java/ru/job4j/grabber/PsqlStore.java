@@ -25,10 +25,9 @@ public class PsqlStore implements Store {
 
     @Override
     public void save(Post post) {
-        try (PreparedStatement pS =
-                     connection.prepareStatement(
-                             "INSERT INTO post(name, text, link, created) VALUES (?, ?, ?, ?)",
-                             Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement pS = connection.prepareStatement(
+                             "INSERT INTO post(name, text, link, created) VALUES (?, ?, ?, ?) "
+                                     + "ON CONFLICT (link) do nothing")) {
             pS.setString(1, post.getTitle());
             pS.setString(2, post.getDescription());
             pS.setString(3, post.getLink());
