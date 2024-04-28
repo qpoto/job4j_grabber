@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Properties;
 
@@ -24,6 +25,7 @@ public class Grabber implements Grab {
 
     @Override
     public void init(Parse parse, Store store, Scheduler scheduler) throws SchedulerException {
+        scheduler.start();
         JobDataMap data = new JobDataMap();
         data.put("store", store);
         data.put("parse", parse);
@@ -48,7 +50,7 @@ public class Grabber implements Grab {
                     try (OutputStream out = socket.getOutputStream()) {
                         out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
                         for (Post post : store.getAll()) {
-                            out.write(post.toString().getBytes());
+                            out.write(post.toString().getBytes(Charset.forName("Windows-1251")));
                             out.write(System.lineSeparator().getBytes());
                         }
                     } catch (IOException io) {
@@ -77,16 +79,6 @@ public class Grabber implements Grab {
                 throw new RuntimeException(e);
             }
         }
-
-
-        public static void main(String[] args) throws Exception {
-            Grabber grab = new Grabber();
-            grab.cfg();
-            Scheduler scheduler = grab.scheduler();
-            Store store = grab.store();
-            grab.init(new HabrCareerParse(new HabrCareerDateTimeParser()), store, scheduler);
-            grab.web(store);
-        }
     }
 
     private Store store() throws Exception {
@@ -104,5 +96,14 @@ public class Grabber implements Grab {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        Grabber grab = new Grabber();
+        grab.cfg();
+        Scheduler scheduler = grab.scheduler();
+        Store store = grab.store();
+        grab.init(new HabrCareerParse(new HabrCareerDateTimeParser()), store, scheduler);
+        grab.web(store);
     }
 }
